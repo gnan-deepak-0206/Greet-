@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For My Favorite Person</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #ffafbd;
+            --card-bg: white;
+            --text-main: #444;
+            --primary-pink: #ff7eb3;
+            --deep-love: #ff2a6d;
+            --letter-bg: #fffdf5;
+        }
+
+        body.dark-mode {
+            --bg-color: #1a1a2e;
+            --card-bg: #16213e;
+            --text-main: #e94560;
+            --primary-pink: #0f3460;
+            --deep-love: #e94560;
+            --letter-bg: #0f3460;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0; padding: 0;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh;
+            background: var(--bg-color);
+            color: var(--text-main);
+            transition: background 0.5s ease, color 0.5s ease;
+        }
+
+        #theme-toggle {
+            position: fixed; top: 20px; right: 20px;
+            background: var(--card-bg); border: 2px solid var(--deep-love);
+            padding: 10px; border-radius: 50%; cursor: pointer; font-size: 1.2rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 1001;
+        }
+
+        .bg-symbols {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; pointer-events: none; opacity: 0.4;
+        }
+        .symbol { position: absolute; animation: float linear infinite; }
+        @keyframes float {
+            0% { transform: translateY(110vh) scale(0.5); opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+        }
+
+        .header { text-align: center; padding: 40px 20px; }
+        #greeting {
+            font-size: 3rem;
+            font-weight: 600;
+            margin: 0;
+            /* Colorful gradient */
+            background: linear-gradient(45deg, #ff2a6d, #ff7eb3, #ff2a6d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+            
+            /* POPUP ENRANCE ANIMATION */
+            animation: greetingPopup 1s cubic-bezier(0.17, 0.89, 0.32, 1.49) both,
+                    floatingText 3s ease-in-out infinite alternate;
+        }
+
+        .handwritten-name {
+            font-family: 'Dancing Script', cursive;
+            font-size: 3.8rem;
+            font-weight: 700;
+            color: #ff2a6d; /* Solid color to keep it sharp */
+            -webkit-text-fill-color: initial;
+            padding: 0 10px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        /* Keyframes for the Popup Effect */
+        @keyframes greetingPopup {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Keyframes for a gentle floating motion */
+        @keyframes floatingText {
+            from { transform: translateY(0px); }
+            to { transform: translateY(-10px); }
+        }
+        #clock { font-size: 1.1rem; background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; backdrop-filter: blur(5px); }
+
+        .main-container {
+            display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start;
+            gap: 40px; width: 95%; max-width: 1100px;
+            flex-direction: row-reverse;
+        }
+
+        .photo-side {
+            flex: 1; min-width: 320px; background: rgba(255,255,255,0.1);
+            padding: 30px; border-radius: 20px; backdrop-filter: blur(8px);
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;
+        }
+        .calendar-side {
+            width: 320px; background: var(--card-bg); padding: 30px;
+            border-radius: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); text-align: center;
+        }
+
+        .today { 
+            background: var(--deep-love) !important; 
+            color: #ffffff !important; /* This makes the number '4' white and visible */
+            border-radius: 50%; 
+            font-weight: bold; 
+        }
+
+        /* UPDATED: Polaroid with Click to Reveal */
+        .polaroid {
+            background: white; padding: 10px 10px 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            transform: rotate(var(--r)); transition: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: blur(15px) grayscale(1); /* Fascinating initial state */
+            cursor: pointer;
+            position: relative;
+        }
+        .polaroid.revealed {
+            filter: blur(0) grayscale(0);
+            transform: scale(1.05) rotate(0deg);
+            z-index: 10;
+        }
+        .polaroid img { width: 140px; height: 140px; object-fit: cover; pointer-events: none; }
+
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 20px; }
+        .day { padding: 10px 0; font-size: 0.9rem; }
+        .today { background: var(--deep-love); color: white; border-radius: 50%; font-weight: bold; }
+
+        .btn {
+            margin-top: 25px; padding: 12px 30px; border: none; border-radius: 50px;
+            cursor: pointer; font-weight: bold; font-family: 'Poppins', sans-serif;
+            box-shadow: 0 10px 20px rgba(233, 69, 96, 0.3); transition: 0.3s;
+        }
+        #magic-btn { display: none; background: linear-gradient(45deg, #ff416c, #ff4b2b); color: white; }
+
+        .bottom-message { margin: 80px 0 100px; text-align: center; }
+        .i-love-you {
+            font-family: 'Dancing Script', cursive; font-size: 5rem;
+            background: linear-gradient(to right, var(--deep-love), #ffffff, var(--deep-love));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow { to { transform: scale(1.05); filter: drop-shadow(0 0 20px var(--deep-love)); } }
+
+        #letter-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center;
+        }
+        .letter-paper {
+            background: var(--letter-bg); width: 85%; max-width: 450px; padding: 50px 30px;
+            border-radius: 5px; text-align: center; font-family: 'Dancing Script', cursive;
+            font-size: 2rem; line-height: 1.5; color: var(--text-main);
+        }
+
+        /* Music Player Styles */
+        .music-container { display: flex; justify-content: center; padding: 40px 0; width: 100%; }
+        .minimal-player {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 30px; border-radius: 25px; width: 90%; max-width: 400px;
+            text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+        .visualizer { display: flex; justify-content: center; align-items: flex-end; height: 50px; gap: 3px; margin-bottom: 20px; }
+        .bar { width: 3px; height: 15px; background: #000; border-radius: 10px; }
+        .playing .bar { animation: audio-pulse 0.6s infinite ease-in-out alternate; }
+        @keyframes audio-pulse { from { height: 10px; } to { height: 40px; } }
+        .bar:nth-child(even) { animation-delay: 0.2s; }
+        .bar:nth-child(3n) { animation-delay: 0.4s; }
+        #progress-slider { width: 100%; cursor: pointer; accent-color: #000; height: 4px; }
+        .player-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .icon-btn { background: none; border: none; cursor: pointer; color: #000; display: flex; align-items: center; }
+        .main-play-btn { background: #000; color: #fff; border: none; width: 65px; height: 65px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+    </style>
+</head>
+<body>
+
+    <button id="theme-toggle" onclick="toggleTheme()">🌙</button>
+    <div class="bg-symbols" id="bg-layer"></div>
+
+    <div class="header">
+        <h1 id="greeting">Hello...</h1>
+        <div id="clock">00:00:00</div>
+    </div>
+
+    <div class="main-container">
+        <div class="calendar-side">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <button onclick="changeMonth(-1)" style="background:none; border:none; cursor:pointer; font-size:1.2rem;">◀</button>
+                <h3 id="cal-month" style="margin: 0;">Month</h3>
+                <button onclick="changeMonth(1)" style="background:none; border:none; cursor:pointer; font-size:1.2rem;">▶</button>
+            </div>
+            <div class="cal-grid" id="cal-days"></div>
+            <p style="margin-top:20px;">Counting down the sunsets until we’re together: <b id="countdown">0</b></p>
+            <button id="magic-btn" class="btn" onclick="openLetter()">✨ View Today's Greeting ✨</button>
+        </div>
+
+        <div class="photo-side">
+            <div class="polaroid" style="--r: -3deg;" onclick="reveal(this)"><img src="C:\Users\gnand\OneDrive\Pictures\SD Card\IMG_20260117_011424_226.jpg"></div>
+            <div class="polaroid" style="--r: 4deg;" onclick="reveal(this)"><img src="C:\Users\gnand\OneDrive\Pictures\SD Card\IMG_20260201_185046_395.jpg"></div>
+            <div class="polaroid" style="--r: -2deg;" onclick="reveal(this)"><img src="C:\Users\gnand\OneDrive\Pictures\SD Card\IMG_20260125_094816_774.jpg"></div>
+            <div class="polaroid" style="--r: -3deg;" onclick="reveal(this)"><img src="C:\Users\gnand\OneDrive\Pictures\SD Card\IMG_20260216_233622_881.jpg"></div>
+            <div class="polaroid" style="--r: -3deg;" onclick="reveal(this)"><img src="C:\Users\gnand\OneDrive\Pictures\SD Card\IMG_20260216_233752_517.jpg"></div>
+            <div class="polaroid" style="--r: -3deg;" onclick="reveal(this)"><img src="C:\Users\gnand\OneDrive\Pictures\SD Card\IMG_20260216_233759_649.jpg"></div>
+        </div>
+    </div>
+
+    <div class="music-container">
+        <div class="minimal-player">
+            <div class="visualizer" id="visualizer">
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+            </div>
+            <div class="progress-wrapper">
+                <input type="range" id="progress-slider" min="0" max="100" value="0">
+            </div>
+            <div class="player-controls">
+                <button class="icon-btn shuffle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg></button>
+                <button class="icon-btn" onclick="prevSong()"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
+                <button class="main-play-btn" onclick="togglePlay()"><svg id="play-pause-icon" width="40" height="40" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
+                <button class="icon-btn" onclick="nextSong()"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6zm9-12h2v12h-2z"/></svg></button>
+                <button class="icon-btn repeat"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 2l4 4-4 4M3 11V9a4 4 0 014-4h14M7 22l-4-4 4-4M21 13v2a4 4 0 01-4 4H3"/></svg></button>
+            </div>
+            <p id="current-song-title">Our First Date Song</p>
+        </div>
+        <audio id="audio-element"></audio>
+    </div>
+
+    <div class="bottom-message">
+        <div class="i-love-you">I Love You</div>
+    </div>
+
+    <div id="letter-overlay">
+        <div class="letter-paper">
+            <div id="letter-text"></div>
+            <button class="btn" onclick="closeLetter()" style="background:#444; color:white;">Close</button>
+        </div>
+    </div>
+
+    <script>
+        const meetDate = new Date("2026-05-10");
+        let currentDisplayDate = new Date();
+
+        const specialDates = {
+            "1-1": "Happy New Year, My Love! ✨",
+            "2-14": "Happy Valentine's Day! ❤️🥰😇😘",
+            "3-4": "Happy Birthday, Beautiful! 🎂 Today is special!",
+            "3-4": "Happy Holi Bangaram! celebrate this Holi with full of colors😇🥰❤️",
+            "8-15": "Happy Independence Day! 🇮🇳",
+            "10-31": "Happy Halloween! 🎃",
+            "12-25": "Merry Christmas, My Angel! 🎄🎁"
+        };
+
+        const songList = [
+            { title: "Madhuvaramae", url: "C:/Users/gnand/OneDrive/Desktop/coding/html/For_S/Madhuvaramae.mp3" },
+        ];
+
+        let songIndex = 0;
+        const audioPlayer = document.getElementById('audio-element');
+        const playPauseBtn = document.getElementById('play-pause-icon');
+        const visualizer = document.getElementById('visualizer');
+        const slider = document.getElementById('progress-slider');
+
+        // NEW: Click to Reveal Function
+        function reveal(el) {
+            el.classList.toggle('revealed');
+        }
+
+        function togglePlay() {
+            if (audioPlayer.paused) {
+                if(!audioPlayer.src) loadSong(0);
+                audioPlayer.play();
+                playPauseBtn.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+                visualizer.classList.add('playing');
+            } else {
+                audioPlayer.pause();
+                playPauseBtn.innerHTML = '<path d="M8 5v14l11-7z"/>';
+                visualizer.classList.remove('playing');
+            }
+        }
+
+        function loadSong(idx) {
+            songIndex = idx;
+            audioPlayer.src = songList[songIndex].url;
+            document.getElementById('current-song-title').innerText = songList[songIndex].title;
+        }
+
+        function nextSong() { songIndex = (songIndex + 1) % songList.length; loadSong(songIndex); audioPlayer.play(); visualizer.classList.add('playing'); playPauseBtn.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'; }
+        function prevSong() { songIndex = (songIndex - 1 + songList.length) % songList.length; loadSong(songIndex); audioPlayer.play(); visualizer.classList.add('playing'); playPauseBtn.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'; }
+
+        audioPlayer.addEventListener('timeupdate', () => {
+            const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+            slider.value = progress || 0;
+        });
+
+        slider.addEventListener('input', () => {
+            const seekTime = (slider.value / 100) * audioPlayer.duration;
+            audioPlayer.currentTime = seekTime;
+        });
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const btn = document.getElementById('theme-toggle');
+            btn.innerText = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+        }
+
+        function createEmojis() {
+            const bg = document.getElementById('bg-layer');
+            const syms = ['❤️','💖','✨','🥰','💝','🌹'];
+            for(let i=0; i<60; i++) {
+                let s = document.createElement('div');
+                s.className = 'symbol';
+                s.innerText = syms[Math.floor(Math.random()*syms.length)];
+                s.style.left = Math.random()*100+"vw";
+                s.style.animation = `float ${Math.random()*5+4}s linear infinite`;
+                s.style.animationDelay = Math.random()*10+"s";
+                bg.appendChild(s);
+            }
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString();
+            
+            const h = now.getHours();
+            let g = "Good Night";
+            if(h < 12) g = "Good Morning";
+            else if(h < 17) g = "Good Afternoon";
+            else if(h < 21) g = "Good Evening";
+
+            // Applying the colorful greeting and handwriting to the name
+            const greetingContainer = document.getElementById('greeting');
+            greetingContainer.innerHTML = `${g}, <span class="handwritten-name">Sarayu!</span>`;
+        }
+
+        function renderCalendar() {
+            const daysContainer = document.getElementById('cal-days');
+            daysContainer.innerHTML = ""; 
+            
+            const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            document.getElementById('cal-month').innerText = mNames[currentDisplayDate.getMonth()] + " " + currentDisplayDate.getFullYear();
+            
+            const firstDay = new Date(currentDisplayDate.getFullYear(), currentDisplayDate.getMonth(), 1).getDay();
+            const lastDay = new Date(currentDisplayDate.getFullYear(), currentDisplayDate.getMonth() + 1, 0).getDate();
+            
+            // Fill empty slots for previous month
+            for(let i=0; i<firstDay; i++) {
+                daysContainer.appendChild(document.createElement('div'));
+            }
+
+            const realToday = new Date();
+
+            for(let i=1; i<=lastDay; i++) {
+                let d = document.createElement('div');
+                d.className = 'day';
+                d.innerText = i;
+                
+                // 1. HIGHLIGHT TODAY: Ensure March 4th is visible and beautiful
+                if(i === realToday.getDate() && 
+                currentDisplayDate.getMonth() === realToday.getMonth() && 
+                currentDisplayDate.getFullYear() === realToday.getFullYear()) {
+                    d.classList.add('today');
+                }
+
+                // 2. INTERACTIVE HISTORY: Check if THIS specific date has a greeting
+                const checkKey = (currentDisplayDate.getMonth() + 1) + "-" + i;
+                if(specialDates[checkKey]) {
+                    d.style.cursor = "pointer";
+                    d.style.color = "#ff2a6d"; // A hint that a surprise is hidden here
+                    d.style.fontWeight = "bold";
+                    
+                    // Clicking the number in the calendar shows THAT day's message
+                    d.onclick = function() {
+                        document.getElementById('letter-text').innerText = specialDates[checkKey];
+                        document.getElementById('letter-overlay').style.display = 'flex';
+                    };
+                }
+
+                daysContainer.appendChild(d);
+            }
+            
+            // 3. COUNTDOWN: Updated to say "Days left to see you"
+            const diff = Math.ceil((meetDate - realToday) / (1000 * 60 * 60 * 24));
+            const countdownElement = document.getElementById('countdown');
+            if (countdownElement) {
+                countdownElement.innerText = diff > 0 ? diff : "0";
+            }
+
+            // 4. THE MAGIC BUTTON: Always show today's real birthday greeting
+            const magicBtn = document.getElementById('magic-btn');
+            const todayKey = (realToday.getMonth() + 1) + "-" + realToday.getDate();
+            
+            if (specialDates[todayKey]) {
+                magicBtn.style.display = "block";
+                magicBtn.onclick = function() {
+                    document.getElementById('letter-text').innerText = specialDates[todayKey];
+                    document.getElementById('letter-overlay').style.display = 'flex';
+                };
+            } else {
+                magicBtn.style.display = "none";
+            }
+        }
+
+        function changeMonth(step) {
+            const newMonth = currentDisplayDate.getMonth() + step;
+            const testDate = new Date(currentDisplayDate.getFullYear(), newMonth, 1);
+            const today = new Date();
+            const minDate = new Date(today.getFullYear() - 1, today.getMonth(), 1);
+            const maxDate = new Date(today.getFullYear() + 2, today.getMonth(), 1);
+            if(testDate >= minDate && testDate <= maxDate) {
+                currentDisplayDate.setMonth(newMonth);
+                renderCalendar();
+            }
+        }
+
+        function openLetter() {
+            const realToday = new Date();
+            // This creates the key "3-4" specifically for today's real date
+            const todayKey = (realToday.getMonth() + 1) + "-" + realToday.getDate();
+            
+            if (specialDates[todayKey]) {
+                document.getElementById('letter-text').innerText = specialDates[todayKey];
+                document.getElementById('letter-overlay').style.display = 'flex';
+            }
+        }
+        function closeLetter() { document.getElementById('letter-overlay').style.display = 'none'; }
+
+        setInterval(updateClock, 1000);
+        updateClock();
+        createEmojis();
+        renderCalendar();
+    </script>
+</body>
+</html>
